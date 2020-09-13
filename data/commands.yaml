@@ -1,0 +1,4 @@
+- text:
+  - east
+  - e
+  action: doEast
