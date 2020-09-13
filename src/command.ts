@@ -10,8 +10,8 @@ export class CommandListNode {
 export class CommandList {
   root = new CommandListNode();
 
-  addCommand(command: string) {
-    const letters = command.split("");
+  addCommand(text: string, command: Command) {
+    const letters = text.split("");
     let node = this.root;
     for (let index = 0; index < letters.length; ++index) {
       const letter = letters[index];
@@ -22,13 +22,13 @@ export class CommandList {
       node.letter = letter;
       if (index === letters.length - 1) {
         if (node.command) {
-          console.error("Conflict when trying to add command:", command);
+          console.error("Conflict when trying to add command:", text);
           console.error("Existing command: ", node.command);
           return false;
         }
 
-        node.command = new Command();
-        node.command.text = command;
+        node.command = command;
+        break;
       }
     }
     return true;
@@ -73,6 +73,36 @@ export class CommandList {
 
     return false;
   }
+
+  loadCommands() {
+    return new Promise<boolean>((resolve, reject) => {
+      readFile("./data/commands.yaml", { encoding: "utf8" }, (err, data) => {
+        if (err) {
+          return reject(err);
+        }
+        let yaml = safeLoad(data);
+        if (!yaml) {
+          return reject("No commands in data file");
+        } else if (!Array.isArray(yaml)) {
+          return reject("Invalid command file format");
+        }
+        let commands = yaml as CommandFileEntry[];
+        console.log(commands);
+        commands.forEach((command) => {
+          const text = command.text;
+          if (!Array.isArray(command.text)) {
+            command.text = [command.text];
+          }
+          const commandEntry = new Command();
+          commandEntry.text = command.text.join(", ");
+          command.text.forEach((text) => {
+            this.addCommand(text, commandEntry);
+          });
+        });
+        resolve(true);
+      });
+    });
+  }
 }
 
 export class Command {
@@ -80,14 +110,7 @@ export class Command {
   constructor() {}
 }
 
-export function loadCommands() {
-  return new Promise<boolean>((resolve, reject) => {
-    readFile("../data/commands.yaml", { encoding: "utf8" }, (err, data) => {
-      if (err) {
-        return reject(err);
-      }
-      let commands = safeLoad(data);
-      console.log(commands);
-    });
-  });
+export interface CommandFileEntry {
+  text: string | string[];
+  action: string;
 }

@@ -2,7 +2,7 @@ import { Room, RoomPrototype } from "./database/room";
 import { Player } from "./database/player";
 import readLine from "readline";
 import { World } from "./world";
-import { CommandList, loadCommands } from "./command";
+import { CommandList } from "./command";
 
 const world = new World();
 
@@ -14,6 +14,7 @@ firstRoom.contents.add(player);
 console.log(firstRoom);
 
 const commandList = new CommandList();
+/*
 commandList.addCommand("look");
 commandList.addCommand("move");
 commandList.addCommand("get");
@@ -60,9 +61,10 @@ commandList.addCommand("sleep");
 commandList.addCommand("stand");
 commandList.addCommand("tell");
 commandList.addCommand("whisper");
+*/
 
 function load() {
-  return Promise.all([loadCommands()]);
+  return Promise.all([commandList.loadCommands()]);
 }
 
 const rl = readLine.createInterface({
@@ -99,8 +101,10 @@ function readFromConsole() {
 
 async function main() {
   try {
+    console.log("Loading...");
     await load();
 
+    console.log("Ready!");
     readFromConsole();
   } catch (e) {
     console.error(e);
@@ -108,3 +112,4 @@ async function main() {
 }
 
 main();
+
