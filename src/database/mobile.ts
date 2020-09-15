@@ -2,6 +2,7 @@ import { Contents } from "./contents";
 import { Item } from "./item";
 import { Character } from "./character";
 import { v4 } from "uuid";
+import { Zone } from "./zone";
 
 export type MobileId = string & { _type?: "mobile" };
 export class MobilePrototype {
@@ -12,21 +13,21 @@ export class MobilePrototype {
   }
 
   create() {
-    return new Mobile({ prototype: this, id: v4() });
+    //    return new Mobile({ prototype: this, id: v4() });
   }
 }
 
 export interface MobileConstructorOpts {
-  prototype: MobilePrototype;
-  id: MobileId;
+  prototype?: Mobile;
 }
 export class Mobile extends Character {
-  prototype: MobilePrototype;
+  prototype?: Mobile;
   id: MobileId;
+  zone?: Zone;
 
   constructor(opts: MobileConstructorOpts) {
     super();
     this.prototype = opts.prototype;
-    this.id = opts.id;
+    this.id = this.prototype ? this.prototype.id + "." + v4() : v4();
   }
 }
