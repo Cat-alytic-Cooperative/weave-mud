@@ -19,7 +19,7 @@
   - u
   action: movement.up
 - text:
-  - wn
+  - down
   - d
   action: movement.down
 - text: get
@@ -46,7 +46,7 @@
   action: object.wear
 - text:
   - remove
-  - ff
+  - doff
   action: object.remove
 - text:
   - talk
@@ -54,5 +54,5 @@
   action: communication.talk
 - text: quit
   action: system.quit
-- text: shutwn
+- text: shutdown
   action: system.shutdown

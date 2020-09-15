@@ -1,13 +1,12 @@
-class TrieNode {
-  letter: string = "";
+export class TrieNode {
+  phrase = "";
   children: Map<string, TrieNode> = new Map();
-  isEnd = false;
 }
 
-function nodeIterator(
+function nodeIterator<T>(
   word: string,
   root: TrieNode,
-  callback: (letter: string, node: TrieNode, previousNode?: TrieNode) => boolean
+  callback: (letter: string, node: TrieNode, previousNode?: TrieNode) => T
 ) {
   const letters = word.split("");
   let node: TrieNode | undefined = root;
@@ -25,7 +24,6 @@ function nodeIterator(
     if (!node) {
       break;
     }
-    node.letter = letter;
     if (index === letters.length - 1) {
       return callback(letter, node, previousNode);
     }
@@ -34,38 +32,67 @@ function nodeIterator(
   return false;
 }
 
-export class Trie<T extends TrieNode> {
-  root: T;
+export class Trie {
+  root: TrieNode;
 
-  constructor(nodeType: new () => T) {
-    this.root = new nodeType();
+  constructor() {
+    this.root = new TrieNode();
   }
 
   insert(word: string) {
     return nodeIterator(word, this.root, (letter, node, previous) => {
-      node.letter = letter;
-      node.isEnd = true;
-      return true;
+      node.phrase = word;
+      return node;
     });
   }
 
   remove(word: string) {
     return nodeIterator(word, this.root, (letter, node, previous) => {
-      if (node.isEnd) {
+      if (node.phrase) {
         if (node.children.size === 0 && previous) {
-          previous.children.delete(node.letter);
+          previous.children.delete(letter);
         }
-        return true;
+        return node;
       }
       return false;
     });
   }
 
   has(word: string) {
-    return nodeIterator(
-      word,
-      this.root,
-      (letter, node, previous) => node.isEnd
+    return nodeIterator(word, this.root, (letter, node, previous) =>
+      node.phrase ? node : false
     );
+  }
+
+  searchFor(word: string) {
+    return nodeIterator(word, this.root, (letter, node, previous) => {
+      return { found: node.phrase, node: node };
+    });
+  }
+
+  private breadthFirstCommandList(node: TrieNode) {
+    const nodeList: TrieNode[] = [];
+    const queue = [node];
+    while (true) {
+      const currentNode = queue.shift();
+      if (!currentNode) {
+        break;
+      }
+      if (currentNode.phrase) {
+        nodeList.push(currentNode);
+      }
+      const children = currentNode.children.values();
+      let child = children.next();
+      while (!child.done) {
+        queue.push(child.value);
+        child = children.next();
+      }
+    }
+
+    return nodeList;
+  }
+
+  allWordsFrom(node?: TrieNode) {
+    return this.breadthFirstCommandList(node ?? this.root);
   }
 }

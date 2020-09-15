@@ -5,6 +5,7 @@ import movement from "./movement";
 
 import { readFile } from "fs";
 import { safeLoad } from "js-yaml";
+import { Trie } from "../trie";
 
 export class CommandListNode {
   children: { [letter: string]: CommandListNode } = {};
@@ -14,6 +15,7 @@ export class CommandListNode {
 
 export class CommandList {
   root = new CommandListNode();
+  trie = new Trie();
 
   addCommand(text: string, command: Command) {
     const letters = text.split("");
@@ -102,6 +104,7 @@ export class CommandList {
           commandEntry.text = command.text.join(", ");
           command.text.forEach((text) => {
             this.addCommand(text, commandEntry);
+            this.trie.insert(text);
           });
         });
         resolve(true);
@@ -123,6 +126,29 @@ export class CommandList {
       return;
     }
     const command = this.findCommand(commandText);
+    const results = this.trie.searchFor(commandText);
+    if (results) {
+      console.log(results);
+      if (!results.found) {
+        // no exact match
+        const lookup = this.trie.allWordsFrom(results.node);
+        switch (lookup.length) {
+          case 0:
+            console.log("No match.");
+            break;
+          case 1:
+            console.log("Match:", lookup[0]);
+            break;
+          default:
+            console.log(
+              "Did you mean",
+              lookup.map((command) => command.phrase).join(", ")
+            );
+        }
+      } else {
+        console.log("Match:", results.node.phrase);
+      }
+    }
     if (!command) {
       console.log("No match.");
     } else if (Array.isArray(command)) {
