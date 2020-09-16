@@ -42,7 +42,7 @@
   action: object.drop
 - text:
   - wear
-  - n
+  - don
   action: object.wear
 - text:
   - remove
@@ -56,3 +56,8 @@
   action: system.quit
 - text: shutdown
   action: system.shutdown
+- text:
+  - move
+  - go
+  action: movement.move
+  
