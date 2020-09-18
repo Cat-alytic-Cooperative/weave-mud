@@ -2,7 +2,7 @@ import { Room, RoomPrototype } from "./database/room";
 import { Player } from "./database/player";
 import readLine from "readline";
 import { World } from "./world";
-import { CommandList } from "./commands";
+import { loadCommands, interpret } from "./commands/interpreter";
 
 const world = new World();
 
@@ -14,10 +14,10 @@ firstRoom.contents.add(player);
 firstRoom.name = "First Room";
 console.log(firstRoom);
 
-const commandList = new CommandList();
+//const commandList = new CommandList();
 
 function load() {
-  return Promise.all([commandList.loadCommands()]);
+  return Promise.all([loadCommands()]);
 }
 
 const rl = readLine.createInterface({
@@ -28,7 +28,7 @@ const rl = readLine.createInterface({
 function readFromConsole() {
   rl.question("> ", (answer) => {
     console.log(`"${answer}"`);
-    commandList.interpret(player, answer);
+    interpret(player, answer);
     readFromConsole();
   });
 }
