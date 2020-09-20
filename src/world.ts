@@ -141,6 +141,8 @@ export function loadWorld() {
         });
       }
 
+      checkExits();
+
       resolve(true);
     });
   });

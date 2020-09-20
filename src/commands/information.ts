@@ -6,8 +6,7 @@ const informationLookup: ActionLookupTable = {
     if (!parameters.length) {
       // Looking at the room the actor is currently in
       if (!actor.location) {
-        console.warn(`${actor.name} is not in a location.`);
-        return;
+        return console.warn(`${actor.name} is not in a location.`);
       }
 
       actor.send(actor.location.name);

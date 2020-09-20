@@ -1,9 +1,26 @@
+import e from "express";
 import { Character } from "../database/character";
 import { ActionLookupTable } from "./action";
 
 const movementLookup: ActionLookupTable = {
-  move(params) {
-    console.log("move:", params.parameters[0]);
+  move({ actor, input, parameters }) {
+    console.log("move:", parameters);
+    if (!parameters) {
+      return actor.send("Go where?");
+    }
+
+    if (!actor.location) {
+      return console.error(`${actor} is not in a location`);
+    }
+
+    const direction = parameters[0];
+    const exit = actor.location.exits.get(direction);
+    if (!exit) {
+      return actor.send("You cannot go in that direction.");
+    }
+
+    actor.location.removeFromRoom(actor);
+    exit.destination.addToRoom(actor);
   },
   east(params) {
     params.parameters = ["east"];
