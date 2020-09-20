@@ -1,23 +1,15 @@
 import { Room, RoomPrototype } from "./database/room";
 import { Player } from "./database/player";
 import readLine from "readline";
-import { World } from "./world";
+import { loadWorld, world } from "./world";
 import { loadCommands, interpret } from "./commands/interpreter";
-
-const world = new World();
+import { loadConfiguration, configuration } from "./configuration";
 
 const player = new Player();
-
-const firstRoomPrototype = new RoomPrototype();
-const firstRoom = new Room();
-firstRoom.contents.add(player);
-firstRoom.name = "First Room";
-console.log(firstRoom);
-
-//const commandList = new CommandList();
+player.name = "Console";
 
 function load() {
-  return Promise.all([loadCommands()]);
+  return Promise.all([loadCommands(), loadWorld(), loadConfiguration()]);
 }
 
 const rl = readLine.createInterface({
@@ -33,10 +25,26 @@ function readFromConsole() {
   });
 }
 
+function initializeConsolePlayer() {
+  const player = new Player();
+  player.name = "Console";
+  return player;
+}
+
 async function main() {
   try {
     console.log("Loading...");
     await load();
+
+    console.log(configuration);
+    console.log(world);
+
+    const startingRoom = world.rooms[configuration.startingRoom];
+    if (!startingRoom) {
+      console.error("No starting room for " + configuration.startingRoom);
+    } else {
+      startingRoom.addToRoom(player);
+    }
 
     console.log("Ready!");
     readFromConsole();

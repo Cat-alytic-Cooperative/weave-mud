@@ -1,14 +1,39 @@
 export * from "./action";
 
+import { Trie } from "../trie";
 import { Character } from "../database/character";
 import movement from "./movement";
-import { Trie } from "../trie";
+import information from "./information";
 
 import { readFile } from "fs";
 import { safeLoad } from "js-yaml";
 
+export interface ActionFunction {
+  (opts: CommandActionOpts): void;
+}
+
+export function doNothing(opts: CommandActionOpts) {
+  return;
+}
+
+export interface CommandActionOpts {
+  actor: Character;
+  originalText: string;
+  parameters: string[];
+}
+
+export class Command {
+  text = "";
+  action: ActionFunction = doNothing;
+  constructor() {}
+}
+
 const commandLookupTrie = new Trie();
 const commands: Map<string, Command> = new Map();
+const commandLookupTables: any = {
+  information,
+  movement,
+};
 
 export function loadCommands() {
   return new Promise<boolean>((resolve, reject) => {
@@ -34,6 +59,14 @@ export function loadCommands() {
           if (commands.has(text)) {
             console.warn(`Collision when adding ${text}`);
             return;
+          }
+          const [table, name] = commandFileEntry.action.split(".");
+          const actionTable = commandLookupTables[table];
+          if (actionTable) {
+            const actionFunction = actionTable[name];
+            if (actionFunction) {
+              commandEntry.action = actionFunction.bind(actionTable);
+            }
           }
           commands.set(text, commandEntry);
           commandLookupTrie.insert(text);
@@ -78,37 +111,14 @@ export function interpret(actor: Character, text: string) {
   }
   if (command) {
     console.log("Match:", command);
+    command.action({ actor, originalText: text, parameters: commandParts });
   }
-}
-
-export interface ActionFunction {
-  (opts: CommandActionOpts): void;
-}
-
-export function doNothing(opts: CommandActionOpts) {
-  return;
-}
-
-export interface CommandActionOpts {
-  actor: Character;
-  originalText: string;
-  parameters: string[];
-}
-
-export class Command {
-  text = "";
-  action: ActionFunction = doNothing;
-  constructor() {}
 }
 
 export interface CommandFileEntry {
   text: string | string[];
   action: string;
 }
-
-const commandLookupTables = {
-  movement,
-};
 
 function splitCommandArguments(text: string) {
   const isSpace = /\s/;

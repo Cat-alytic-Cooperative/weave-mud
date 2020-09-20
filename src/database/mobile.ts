@@ -21,13 +21,8 @@ export interface MobileConstructorOpts {
   prototype?: Mobile;
 }
 export class Mobile extends Character {
-  prototype?: Mobile;
-  id: MobileId;
-  zone?: Zone;
 
   constructor(opts: MobileConstructorOpts) {
-    super();
-    this.prototype = opts.prototype;
-    this.id = this.prototype ? this.prototype.id + "." + v4() : v4();
+    super(opts);
   }
 }

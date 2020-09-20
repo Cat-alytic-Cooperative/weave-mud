@@ -3,38 +3,38 @@ import { ActionLookupTable } from "./action";
 
 const movementLookup: ActionLookupTable = {
   move(params) {
-    console.log("move:", params.arguments[0]);
+    console.log("move:", params.parameters[0]);
   },
   east(params) {
-    params.arguments = ["east"];
+    params.parameters = ["east"];
     this.move(params);
   },
   west(params) {
-    params.arguments = ["west"];
+    params.parameters = ["west"];
     this.move(params);
   },
   north(params) {
-    params.arguments = ["north"];
+    params.parameters = ["north"];
     this.move(params);
   },
   south(params) {
-    params.arguments = ["south"];
+    params.parameters = ["south"];
     this.move(params);
   },
   up(params) {
-    params.arguments = ["up"];
+    params.parameters = ["up"];
     this.move(params);
   },
   down(params) {
-    params.arguments = ["down"];
+    params.parameters = ["down"];
     this.move(params);
   },
   enter(params) {
-    params.arguments = ["enter"];
+    params.parameters = ["enter"];
     this.move(params);
   },
   exit(params) {
-    params.arguments = ["exit"];
+    params.parameters = ["exit"];
     this.move(params);
   },
 };

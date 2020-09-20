@@ -81,12 +81,7 @@ export class Trie {
       if (currentNode.phrase) {
         nodeList.push(currentNode);
       }
-      const children = currentNode.children.values();
-      let child = children.next();
-      while (!child.done) {
-        queue.push(child.value);
-        child = children.next();
-      }
+      queue.push(...currentNode.children.values());
     }
 
     return nodeList;

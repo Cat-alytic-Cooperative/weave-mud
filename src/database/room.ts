@@ -4,6 +4,9 @@ import { Contents } from "./contents";
 import { Player } from "./player";
 import { v4 } from "uuid";
 import { Zone } from "./zone";
+import { Thing, ThingConstructorOpts } from "./thing";
+import { Character } from "./character";
+import { Exit } from "./exit";
 
 export type RoomId = string & { _type?: "room" };
 export class RoomPrototype {
@@ -17,16 +20,24 @@ export class RoomPrototype {
 
 export interface RoomConstructorOpts {
   prototype?: Room;
+  id?: string;
 }
-export class Room {
-  prototype?: Room;
-  id: RoomId = "";
-  name = "";
-  zone?: Zone;
-  public readonly contents = new Contents<Mobile | Item | Player>();
+export class Room extends Thing<Room> {
+  description = "";
+  contents: Set<Item | Character> = new Set();
+  exits: Map<string, Exit> = new Map();
 
   constructor(opts?: RoomConstructorOpts) {
-    this.prototype = opts?.prototype;
-    this.id = this.prototype ? this.prototype.id + "." + v4() : v4();
+    super(opts);
+  }
+
+  addToRoom(thing: Item | Character) {
+    this.contents.add(thing);
+    thing.location = this;
+  }
+
+  removeFromRoom(thing: Item | Character) {
+    this.contents.delete(thing);
+    thing.location = undefined;
   }
 }

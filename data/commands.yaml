@@ -35,6 +35,7 @@
   - leave
   action: movement.exit
 - text:
+  - l
   - look
   - examine
   action: information.look

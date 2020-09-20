@@ -1,0 +1,14 @@
+zones:
+  - id: starting-zone
+    name: Starting Zone
+    rooms:
+      - id: welcome-room
+        name: Welcome Room
+        description: Cool mist twines around your ankles.
+        exits: 
+          east: second-room
+      - id: second-room
+        name: Second Room
+        description: Warm mist swirls around your head.
+        exits:
+          west: welcome-room

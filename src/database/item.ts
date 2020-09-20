@@ -1,6 +1,9 @@
 import { Contents } from "./contents";
 import { v4 } from "uuid";
 import { Zone } from "./zone";
+import { Thing } from "./thing";
+import { Character } from "./character";
+import { Room } from "./room";
 
 export enum ItemType {
   CONTAINER,
@@ -33,16 +36,13 @@ export interface ItemConstructorOpts {
   prototype?: Item;
 }
 
-export class Item {
+export class Item extends Thing<Item> {
   type = ItemType.UNKNOWN;
-  id: ItemId = "";
   names: string[] = [];
-  zone?: Zone;
-  prototype?: Item;
   contents?: Contents<Item>;
+  location?: Room | Item| Character;
 
   constructor(opts: ItemConstructorOpts) {
-    this.prototype = opts.prototype;
-    this.id = this.prototype ? this.prototype.id + "." + v4() : v4();
+    super(opts);
   }
 }

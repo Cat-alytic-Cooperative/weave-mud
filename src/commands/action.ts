@@ -3,7 +3,7 @@ import { Character } from "../database/character";
 export interface ActionParameters {
   actor: Character;
   input: string;
-  arguments: string[];
+  parameters: string[];
 }
 
 export interface ActionLookupTable {
