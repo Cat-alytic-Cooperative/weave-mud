@@ -1,3 +1,4 @@
+import { Character } from "./character";
 import { Room } from "./room";
 export interface ExitConstructorOpts {
   name: string;
@@ -17,5 +18,13 @@ export class Exit {
     this.description = opts.description ?? "";
     this.location = opts.location;
     this.destination = opts.destination;
+  }
+
+  isVisibleTo(viewer: Character) {
+    return true;
+  }
+
+  isPassableBy(character: Character) {
+    return true;
   }
 }

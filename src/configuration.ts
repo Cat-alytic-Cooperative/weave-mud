@@ -1,9 +1,8 @@
 import { readFile } from "fs";
 import { safeLoad } from "js-yaml";
-import { RoomId } from "./database/room";
 
 export interface Configuration {
-  startingRoom: RoomId;
+  startingRoom: string;
 }
 
 export let configuration: Configuration = {

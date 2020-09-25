@@ -1,22 +1,7 @@
-import { Mobile } from "./mobile";
 import { Item } from "./item";
-import { Contents } from "./contents";
-import { Player } from "./player";
-import { v4 } from "uuid";
-import { Zone } from "./zone";
-import { Thing, ThingConstructorOpts } from "./thing";
+import { Thing } from "./thing";
 import { Character } from "./character";
 import { Exit } from "./exit";
-
-export type RoomId = string & { _type?: "room" };
-export class RoomPrototype {
-  id: RoomId = "";
-  name = "";
-
-  constructor() {
-    this.id = v4();
-  }
-}
 
 export interface RoomConstructorOpts {
   prototype?: Room;
@@ -39,5 +24,9 @@ export class Room extends Thing<Room> {
   removeFromRoom(thing: Item | Character) {
     this.contents.delete(thing);
     thing.location = undefined;
+  }
+
+  isVisibleTo(viewer: Character) {
+    return true;
   }
 }

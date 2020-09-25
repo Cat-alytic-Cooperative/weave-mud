@@ -77,7 +77,8 @@ export function loadCommands() {
   });
 }
 
-export function interpret(actor: Character, text: string) {
+export function interpret(actor: Character, text?: string) {
+  if (!text || text.trim().length === 0) return;
   let commandParts = splitCommandArguments(text);
   console.log(commandParts);
   const commandText = commandParts.shift();

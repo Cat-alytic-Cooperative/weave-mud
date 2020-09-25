@@ -1,4 +1,4 @@
-import { Room, RoomId } from "./database/room";
+import { Room } from "./database/room";
 import { Item } from "./database/item";
 import { Mobile } from "./database/mobile";
 

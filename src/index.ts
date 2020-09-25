@@ -1,28 +1,11 @@
-import { Room, RoomPrototype } from "./database/room";
 import { Player } from "./database/player";
-import readLine from "readline";
 import { loadWorld, world } from "./world";
 import { loadCommands, interpret } from "./commands/interpreter";
 import { loadConfiguration, configuration } from "./configuration";
-
-const player = new Player();
-player.name = "Console";
+import { Connection, ConsoleConnection } from "./database/connection";
 
 function load() {
   return Promise.all([loadCommands(), loadWorld(), loadConfiguration()]);
-}
-
-const rl = readLine.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
-function readFromConsole() {
-  rl.question("> ", (answer) => {
-    console.log(`"${answer}"`);
-    interpret(player, answer);
-    readFromConsole();
-  });
 }
 
 function initializeConsolePlayer() {
@@ -30,6 +13,8 @@ function initializeConsolePlayer() {
   player.name = "Console";
   return player;
 }
+
+import { connectionMap } from "./database/connection";
 
 async function main() {
   try {
@@ -40,14 +25,36 @@ async function main() {
     console.log(world);
 
     const startingRoom = world.rooms[configuration.startingRoom];
+
+    console.log("Ready!");
+    const consoleConnection = new ConsoleConnection({ input: [], output: [] });
+    const consolePlayer = new Player();
+    consolePlayer.connection = consoleConnection;
+    consoleConnection.player = consolePlayer;
+    connectionMap.add(consolePlayer, consoleConnection);
+
     if (!startingRoom) {
       console.error("No starting room for " + configuration.startingRoom);
     } else {
-      startingRoom.addToRoom(player);
+      startingRoom.addToRoom(consolePlayer);
     }
 
-    console.log("Ready!");
-    readFromConsole();
+    let mainLoopTimeout = setInterval(() => {
+      // Process input
+      for (let [player, connection] of connectionMap.entries()) {
+        let text = connection.input.shift();
+        if (text) {
+          interpret(player, text);
+        }
+      }
+
+      // Process output
+      for (let [player, connection] of connectionMap.entries()) {
+        connection.flush();
+      }
+    }, 100);
+
+    consoleConnection.start();
   } catch (e) {
     console.error(e);
   }

@@ -1,17 +1,19 @@
 import { Character } from "./character";
+import { Connection } from "./connection";
 
 type PlayerId = string & { _type?: "player" };
 export class Player extends Character {
+  connection?: Connection;
+
   constructor() {
     super();
   }
 
   send(text: string) {
-    console.log(text);
+    this.connection?.send(text);
   }
 
   sendln(text: string) {
-    console.log(text);
-    console.log("\n");
+    this.connection?.send(text + "\r\n");
   }
 }

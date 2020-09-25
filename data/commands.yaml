@@ -1,26 +1,26 @@
 - text:
-  - east
-  - e
+    - east
+    - e
   action: movement.east
 - text:
-  - west
-  - w
+    - west
+    - w
   action: movement.west
 - text:
-  - north
-  - n
+    - north
+    - n
   action: movement.north
 - text:
-  - south
-  - s
+    - south
+    - s
   action: movement.south
 - text:
-  - up
-  - u
+    - up
+    - u
   action: movement.up
 - text:
-  - down
-  - d
+    - down
+    - d
   action: movement.down
 - text: get
   action: object.get
@@ -31,34 +31,39 @@
 - text: enter
   action: movement.enter
 - text:
-  - exit
-  - leave
+    - exit
+    - leave
   action: movement.exit
 - text:
-  - l
-  - look
-  - examine
+    - l
+    - look
+    - examine
   action: information.look
 - text: drop
   action: object.drop
 - text:
-  - wear
-  - don
+    - wear
+    - don
   action: object.wear
 - text:
-  - remove
-  - doff
+    - remove
+    - doff
   action: object.remove
 - text:
-  - talk
-  - chat
+    - talk
+    - chat
   action: communication.talk
 - text: quit
   action: system.quit
 - text: shutdown
   action: system.shutdown
 - text:
-  - move
-  - go
+    - move
+    - go
   action: movement.move
-  
+- text: say
+  action: communication.say
+- text:
+    - emote
+    - pose
+  action: communication.emote
