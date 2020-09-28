@@ -1,5 +1,6 @@
 import readLine from "readline";
 import { Player } from "./player";
+import * as ws from "ws";
 
 export interface ConnectionConstructorOpts {
   input: string[];
@@ -26,7 +27,7 @@ export class ConsoleConnection extends Connection {
   flush() {
     return new Promise<boolean>((resolve, reject) => {
       this.output.forEach((text) => console.log(text));
-      this.output = [];
+      this.output.length = 0;
       resolve(true);
     });
   }
@@ -49,11 +50,45 @@ export class ConsoleConnection extends Connection {
   }
 }
 
+export interface WebSocketConnectionConstructorOpts
+  extends ConnectionConstructorOpts {
+  ws: ws;
+}
+
 export class WebSocketConnection extends Connection {
-  flush() {
-    return Promise.resolve(true);
+  ws: ws;
+
+  constructor(opts: WebSocketConnectionConstructorOpts) {
+    super(opts);
+
+    this.ws = opts.ws;
   }
-  start() {}
+
+  flush() {
+    return new Promise<boolean>((resolve, reject) => {
+      if (this.output.length) {
+        this.ws.send(
+          JSON.stringify({
+            type: "OUTPUT",
+            lines: this.output,
+          })
+        );
+        this.output.length = 0;
+      }
+      resolve(true);
+    });
+  }
+  start() {
+    this.ws.on("message", (data) => {
+      const msg = JSON.parse(data.toString());
+      console.log(msg);
+      switch (msg.type) {
+        case "INPUT":
+          this.input.push(msg.text);
+          break;
+      }
+    });
+  }
 }
 
 export class TelnetConnection extends Connection {
@@ -70,6 +105,8 @@ export const connectionMap = {
     return this.connections.entries();
   },
   add: function (player: Player, connection: Connection) {
+    player.connection = connection;
+    connection.player = player;
     this.players.set(connection, player);
     this.connections.set(player, connection);
   },

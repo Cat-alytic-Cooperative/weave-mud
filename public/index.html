@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Weave MUD</title>
+    <script src="scripts/react/react.production.min.js"></script>
+    <script src="scripts/react/react-dom.production.min.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="scripts/babel/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      function MudInterface(props) {
+        function renderText(text) {
+          return <li>{text}</li>;
+        }
+
+        function handleKeyPress(event) {
+          if (event.key === "Enter") {
+            console.log("Sending", event.target.value);
+            if (props.onSend) {
+              props.onSend(event.target.value);
+            }
+            event.target.value = "";
+            event.preventDefault();
+          }
+        }
+
+        return (
+          <div>
+            <div>
+              <ul>{props.backscroll.map((entry) => renderText(entry))}</ul>
+            </div>
+            <div>
+              <input type="text" onKeyPress={handleKeyPress}></input>
+            </div>
+          </div>
+        );
+      }
+
+      function WelcomeScreen(props) {
+        let username = "";
+        function openConnection() {
+          console.log("Opening connection");
+          if (username) {
+            props.onOpen(username);
+          }
+        }
+
+        function onUsernameChange(event) {
+          username = event.target.value;
+          event.preventDefault();
+        }
+
+        return (
+          <div>
+            <div>
+              <h1>Weave MUD</h1>Welcome to the Weave MUD.
+            </div>
+            <div>
+              Please enter your name in order to join.
+              <div>
+                <input type="text" onChange={onUsernameChange}></input>
+              </div>
+              <button onClick={openConnection}>Login</button>
+            </div>
+          </div>
+        );
+      }
+
+      class App extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = {
+            ws: undefined,
+            backscroll: [],
+          };
+        }
+
+        render() {
+          const openConnection = (username) => {
+            const wsUrl = window.location.origin.replace("http", "ws") + "/ws";
+            const ws = new WebSocket(wsUrl);
+            ws.onopen = () => {
+              console.log("WebSocket connection opened to", wsUrl);
+              ws.send(
+                JSON.stringify({
+                  type: "CONNECT",
+                  username: username,
+                })
+              );
+            };
+
+            ws.onmessage = (msg) => {
+              console.log("WebSocket message:", msg);
+              const data = JSON.parse(msg.data);
+              console.log(data);
+              switch (data.type) {
+                case "HELLO":
+                  console.log("Configuring websocket state");
+                  this.setState({ ws: ws });
+                  break;
+                case "OUTPUT":
+                  this.setState({
+                    backscroll: [...this.state.backscroll, ...data.lines],
+                  });
+                  break;
+              }
+            };
+
+            ws.onclose = () => {
+              console.log("WebSocket connection closed");
+            };
+          };
+
+          const sendCommand = (text) => {
+            if (text === undefined || text === null) return;
+            if (!this.state.ws) return;
+            text = text.toString().trim();
+            this.state.ws.send(
+              JSON.stringify({
+                type: "INPUT",
+                text: text,
+              })
+            );
+          };
+
+          return (
+            <div>
+              <div>
+                {this.state.ws ? (
+                  <MudInterface
+                    onSend={sendCommand}
+                    backscroll={this.state.backscroll}
+                  ></MudInterface>
+                ) : (
+                  <WelcomeScreen onOpen={openConnection}></WelcomeScreen>
+                )}
+              </div>
+            </div>
+          );
+        }
+      }
+
+      ReactDOM.render(<App></App>, document.getElementById("root"));
+    </script>
+  </body>
+</html>
