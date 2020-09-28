@@ -49,6 +49,7 @@ async function main() {
       } else {
         startingRoom.addToRoom(consolePlayer);
       }
+      consoleConnection.start();
     }
 
     /*
@@ -144,8 +145,6 @@ async function main() {
         connection.flush();
       }
     }, 100);
-
-    consoleConnection.start();
   } catch (e) {
     console.error(e);
   }
