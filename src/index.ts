@@ -23,6 +23,8 @@ function initializeConsolePlayer() {
 
 import { connectionMap } from "./database/connection";
 
+console.log(process.env);
+
 async function main() {
   try {
     console.log("Loading...");
@@ -34,38 +36,48 @@ async function main() {
     const startingRoom = world.rooms[configuration.startingRoom];
 
     console.log("Ready!");
-    const consoleConnection = new ConsoleConnection({ input: [], output: [] });
-    const consolePlayer = new Player();
-    connectionMap.add(consolePlayer, consoleConnection);
+    if (process.env.WEAVE_CONSOLE) {
+      const consoleConnection = new ConsoleConnection({
+        input: [],
+        output: [],
+      });
+      const consolePlayer = new Player();
+      connectionMap.add(consolePlayer, consoleConnection);
 
-    if (!startingRoom) {
-      console.error("No starting room for " + configuration.startingRoom);
-    } else {
-      startingRoom.addToRoom(consolePlayer);
+      if (!startingRoom) {
+        console.error("No starting room for " + configuration.startingRoom);
+      } else {
+        startingRoom.addToRoom(consolePlayer);
+      }
     }
 
     /*
      * Telnet server
      */
-    const server = Telnet.server(9090);
-    server
-      .filter((event) => event instanceof Event.Connected)
-      .subscribe((event: Event.Server) => {
-        const connection = (event as Event.Connected).connection;
-        console.log(
-          "Connection received from",
-          connection.socket.remoteAddress
-        );
+    if (process.env.WEAVE_TELNET) {
+      const server = Telnet.server(9090);
+      server
+        .filter((event) => event instanceof Event.Connected)
+        .subscribe((event: Event.Server) => {
+          const connection = (event as Event.Connected).connection;
+          console.log(
+            "Connection received from",
+            connection.socket.remoteAddress
+          );
+        });
+      server
+        .filter((event) => event instanceof Event.Disconnected)
+        .subscribe((event: Event.Server) => {
+          const connection = (event as Event.Disconnected).connection;
+          console.log(
+            "Connection closed from",
+            connection.socket.remoteAddress
+          );
+        });
+      server.start().then(() => {
+        console.log(`Weave telnet server listening on port 9090`);
       });
-    server
-      .filter((event) => event instanceof Event.Disconnected)
-      .subscribe((event: Event.Server) => {
-        const connection = (event as Event.Disconnected).connection;
-        console.log("Connection closed from", connection.socket.remoteAddress);
-      });
-    server.start().then(() => {
-      console.log(`Weave telnet server listening on port 9090`);
-    });
+    }
 
     /*
      * Express server
@@ -123,8 +135,7 @@ async function main() {
       for (let [player, connection] of connectionMap.entries()) {
         let text = connection.input.shift();
         if (text) {
-          console.log("input", player, text);
-          interpret(player, text);
+          interpret(player, text.trim());
         }
       }
 
